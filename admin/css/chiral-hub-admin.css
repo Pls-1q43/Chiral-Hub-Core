@@ -1,0 +1,40 @@
+/**
+ * All of the CSS for your admin-specific functionality should be
+ * included in this file.
+ */
+
+/* Settings Page Styles */
+.chiral-hub-settings-section-header {
+    margin-bottom: 10px;
+}
+
+.chiral-hub-settings-section-header h3 {
+    font-size: 1.2em;
+    margin: 0 0 5px 0;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ddd;
+}
+
+.form-table th {
+    width: 250px; /* Adjust as needed for longer labels */
+}
+
+.form-table td p.description {
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* Node Management Table Styles */
+.wp-list-table.users .column-node-id {
+    width: 20%;
+}
+
+.wp-list-table.users .column-actions {
+    width: 15%;
+}
+
+.wp-list-table.posts .column-original-source-url {
+    width: 40%;
+}
+
+/* Add more specific styles as needed */

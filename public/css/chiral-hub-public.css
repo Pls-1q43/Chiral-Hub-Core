@@ -1,0 +1,28 @@
+/**
+ * All of ה-CSS for your public-facing functionality should be
+ * included in this file.
+ */
+
+/* 
+   Chiral Hub Core primarily deals with backend, API, and redirection.
+   Public facing CSS might be minimal unless specific elements 
+   (e.g., from shortcodes or widgets) are styled by the plugin. 
+   Most styling would typically be handled by the active theme.
+*/
+
+/* Example: Styles for a hypothetical shortcode output */
+/*
+.chiral-hub-related-content-container {
+    border: 1px solid #eee;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.chiral-hub-related-content-container h3 {
+    margin-top: 0;
+}
+
+.chiral-hub-related-item {
+    margin-bottom: 10px;
+}
+*/

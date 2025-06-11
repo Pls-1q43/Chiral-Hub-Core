@@ -1,0 +1,270 @@
+# Copyright (C) 2023 Your Name
+# This file is distributed under the same license as the Chiral Hub Core plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: Chiral Hub Core 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/chiral-hub-core\n"
+"Last-Translator: Your Name <email@example.com>\n"
+"Language-Team: Your Language Team <your-team-email@example.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2023-10-27 10:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: Poedit 3.0.1\n"
+"X-Domain: chiral-hub-core\n"
+
+#. Plugin Name of the plugin/theme
+msgid "Chiral Hub Core"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://example.com/chiral-hub-core-plugin"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "Core functionality for the Chiral Hub, managing data synchronization and connections with Chiral Nodes."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Your Name or Company"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "https://example.com"
+msgstr ""
+
+#: includes/class-chiral-hub-core.php:100
+msgid "Chiral Hub Core requires WordPress 5.0 or higher. The plugin has been deactivated."
+msgstr ""
+
+#: includes/class-chiral-hub-core.php:106
+msgid "Chiral Hub Core requires PHP 7.2 or higher. The plugin has been deactivated."
+msgstr ""
+
+#: admin/class-chiral-hub-admin.php:60
+#: admin/class-chiral-hub-admin.php:100
+msgid "Chiral Hub Core Settings"
+msgstr ""
+
+#: admin/class-chiral-hub-admin.php:61
+msgid "Node Management"
+msgstr ""
+
+#: admin/class-chiral-hub-admin.php:101
+msgid "Chiral Hub"
+msgstr ""
+
+#: admin/class-chiral-hub-admin.php:120
+msgid "General Settings"
+msgstr ""
+
+#: admin/class-chiral-hub-admin.php:121
+msgid "Configure general settings for the Chiral Hub."
+msgstr ""
+
+#: admin/class-chiral-hub-admin.php:130
+msgid "Chiral Network Name"
+msgstr ""
+
+#: admin/class-chiral-hub-admin.php:135
+msgid "Enter the name of your Chiral Network. This is for display purposes."
+msgstr ""
+
+#: admin/class-chiral-hub-admin.php:142
+msgid "New Porter Sync Strategy"
+msgstr ""
+
+#: admin/class-chiral-hub-admin.php:149
+msgid "Publish Immediately"
+msgstr ""
+
+#: admin/class-chiral-hub-admin.php:150
+msgid "Set as Pending Review"
+msgstr ""
+
+#: admin/class-chiral-hub-admin.php:151
+msgid "Save as Draft"
+msgstr ""
+
+#: admin/class-chiral-hub-admin.php:153
+msgid "Default status for new content synced from Porters."
+msgstr ""
+
+#: admin/class-chiral-hub-admin.php:160
+msgid "Default Related Content Count"
+msgstr ""
+
+#: admin/class-chiral-hub-admin.php:165
+msgid "Default number of related content items to fetch if not specified in API request (max 20)."
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:16
+msgid "Save Settings"
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:23
+msgid "Connected Chiral Nodes (Porters)"
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:24
+msgid "This section lists all users with the Chiral Porter role. These users represent connected Chiral Nodes. You can manage their Application Passwords by editing their profiles."
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:37
+msgid "Username"
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:38
+msgid "Display Name"
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:39
+msgid "Email"
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:40
+msgid "Node ID"
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:41
+msgid "Actions"
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:50
+msgid "Edit Profile & App Passwords"
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:54
+msgid "Not Set"
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:57
+msgid "View Synced Data"
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:64
+msgid "No Chiral Porters found. A Chiral Porter user is automatically created when a new Chiral Node connects for the first time, or you can create one manually and assign the Chiral Porter role."
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:80
+msgid "Title (Hub)"
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:80
+msgid "Original Source URL"
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:80
+msgid "Date Synced"
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:92
+msgid "No data synced from this Porter yet."
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:95
+msgid "Invalid Porter ID specified."
+msgstr ""
+
+#: includes/class-chiral-hub-cpt.php:45
+msgid "Chiral Data Item"
+msgstr ""
+
+#: includes/class-chiral-hub-cpt.php:46
+msgid "Chiral Data Items"
+msgstr ""
+
+#: includes/class-chiral-hub-cpt.php:60
+msgid "Content synced from Chiral Nodes."
+msgstr ""
+
+#: includes/class-chiral-hub-roles.php:40
+msgid "Chiral Porter"
+msgstr ""
+
+#: includes/class-chiral-hub-roles.php:70
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: includes/class-chiral-hub-rest-api.php:40
+msgid "The source URL of the content item for which to find related data."
+msgstr ""
+
+#: includes/class-chiral-hub-rest-api.php:46
+msgid "The unique ID of the Chiral Node making the request."
+msgstr ""
+
+#: includes/class-chiral-hub-rest-api.php:52
+msgid "Number of related items to return."
+msgstr ""
+
+#: includes/class-chiral-hub-rest-api.php:70
+#: includes/class-chiral-hub-rest-api.php:92
+msgid "Sorry, you are not allowed to access this endpoint. Requires Chiral Porter role."
+msgstr ""
+
+#: includes/class-chiral-hub-rest-api.php:79
+msgid "The requesting_node_id does not match the authenticated user's registered node ID."
+msgstr ""
+
+#: includes/class-chiral-hub-rest-api.php:116
+msgid "No Chiral Data item found in the Hub for the given source URL and Node ID."
+msgstr ""
+
+#: includes/class-chiral-hub-rest-api.php:125
+#: includes/class-chiral-hub-jetpack.php:30
+msgid "Jetpack Related Posts module is not active or Jetpack is not connected to WordPress.com."
+msgstr ""
+
+#: includes/class-chiral-hub-rest-api.php:176
+msgid "Pong! Connection to Chiral Hub successful."
+msgstr ""
+
+#: includes/class-chiral-hub-sync.php:30
+msgid "Essential data (source_url, node_id, original_post_id, title) is missing."
+msgstr ""
+
+#: includes/class-chiral-hub-sync.php:168
+msgid "Could not set featured image after sideloading."
+msgstr ""
+
+#: includes/class-chiral-hub-jetpack.php:37
+msgid "Jetpack_RelatedPosts class not found. Ensure Jetpack is fully loaded."
+msgstr ""
+
+#: includes/class-chiral-hub-jetpack.php:59
+msgid "Jetpack failed to retrieve related posts. The index might still be building or there could be a connection issue."
+msgstr ""
+
+#: includes/class-chiral-hub-rest-api.php:244
+msgid "No related posts found or unable to compute with Jetpack."
+msgstr ""
+
+#: includes/class-chiral-hub-porter-admin.php:XXX
+msgid "Status"
+msgstr ""
+
+#: includes/class-chiral-hub-porter-admin.php:XXX
+msgid "Pending Review"
+msgstr ""
+
+#: admin/partials/chiral-hub-admin-display.php:XXX
+msgid "Pending Review"
+msgstr ""
+
+#: admin/views/node-management-page.php:XXX
+msgid "Status"
+msgstr ""
+
+#: admin/views/node-management-page.php:XXX
+msgid "Pending Review"
+msgstr ""
+
+#: admin/views/node-management-page.php:XXX
+msgid "Cannot delete posts pending review"
+msgstr ""
+
+#: includes/class-chiral-hub-porter-admin.php:XXX
+msgid "Cannot delete posts pending review"
+msgstr ""
