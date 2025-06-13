@@ -235,6 +235,9 @@ class Chiral_Hub_Core {
         
         // Exclude chiral_data from site search results while keeping them accessible to Jetpack
         $this->loader->add_action( 'pre_get_posts', $plugin_public, 'exclude_chiral_data_from_search' );
+        
+        // Add robots meta tag to prevent search engine indexing of chiral_data pages
+        $this->loader->add_action( 'wp_head', $plugin_public, 'add_chiral_data_robots_meta' );
     }
 
     /**

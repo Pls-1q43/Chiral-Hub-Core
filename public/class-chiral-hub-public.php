@@ -149,4 +149,23 @@ class Chiral_Hub_Public {
         }
     }
 
+    /**
+     * Add robots meta tag to prevent search engine indexing of chiral_data pages.
+     * 
+     * This outputs noindex,nofollow robots meta tag only for single chiral_data pages
+     * to prevent search engines from indexing aggregated content while maintaining
+     * functionality for Jetpack related posts and internal redirects.
+     *
+     * @since    1.0.0
+     */
+    public function add_chiral_data_robots_meta() {
+        // Only apply to single chiral_data pages on the frontend
+        if ( is_admin() || ! is_singular( Chiral_Hub_CPT::CPT_SLUG ) ) {
+            return;
+        }
+
+        // Output the robots meta tag
+        echo '<meta name="robots" content="noindex, nofollow">' . "\n";
+    }
+
 }
