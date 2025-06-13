@@ -1,6 +1,5 @@
 === Chiral Hub Core ===
 Contributors: pls1q43
-Donate link: https://1q43.blog/donate/
 Tags: hub, network, content aggregation, jetpack, related posts, cross-site, content discovery, api
 Requires at least: 5.2
 Tested up to: 6.6
