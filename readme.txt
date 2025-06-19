@@ -1,5 +1,6 @@
 === Chiral Hub Core ===
 Contributors: pls1q43
+Donate link: https://1q43.blog/donate/
 Tags: hub, network, content aggregation, jetpack, related posts, cross-site, content discovery, api
 Requires at least: 5.2
 Tested up to: 6.6
@@ -144,25 +145,6 @@ No negative impact. The chiral_data post type is excluded from public searches a
 
 == Changelog ==
 
-= 1.0.1 =
-* Enhanced SEO protection for aggregated content
-* Added robots meta tags to prevent search engine indexing of chiral_data pages
-* Improved search engine exclusion while maintaining Jetpack functionality
-* Fixed potential duplicate content issues in search results
-* Maintained all existing functionality including redirects and related posts
-
-= 1.0.0 =
-* Initial release
-* Complete hub infrastructure with chiral_data CPT
-* Secure REST API endpoints for node communication
-* Porter user role and authentication system
-* Jetpack integration for WordPress.com synchronization
-* Administrative interface for network management
-* Related posts API with WordPress.com backend
-* Content exclusion from public search results
-* Comprehensive error handling and logging
-
-== Upgrade Notice ==
 
 = 1.0.1 =
 Important SEO enhancement: This update adds robots meta tags to prevent search engines from indexing aggregated content pages, solving duplicate content issues while preserving all existing functionality. Recommended for all users.
