@@ -49,6 +49,9 @@ class Chiral_Hub_Activator {
         $node_checker = new Chiral_Hub_Node_Checker( 'chiral-hub-core', '1.0.0' );
         $node_checker->schedule_daily_checks();
 
+        // Schedule RSS sync tasks
+        self::schedule_rss_sync_tasks();
+
         // Flush rewrite rules to ensure CPTs and custom roles are recognized.
         flush_rewrite_rules();
     }
@@ -70,6 +73,24 @@ class Chiral_Hub_Activator {
             if ( get_option( $option_name ) === false ) {
                 update_option( $option_name, $default_value );
             }
+        }
+    }
+
+    /**
+     * Schedules RSS synchronization tasks.
+     *
+     * @since 1.2.0
+     * @access private
+     */
+    private static function schedule_rss_sync_tasks() {
+        // Schedule hourly RSS sync if not already scheduled
+        if ( ! wp_next_scheduled( 'chiral_hub_hourly_rss_sync' ) ) {
+            wp_schedule_event( time(), 'hourly', 'chiral_hub_hourly_rss_sync' );
+        }
+
+        // Schedule daily RSS content patrol if not already scheduled  
+        if ( ! wp_next_scheduled( 'chiral_hub_daily_rss_patrol' ) ) {
+            wp_schedule_event( time(), 'daily', 'chiral_hub_daily_rss_patrol' );
         }
     }
 }
