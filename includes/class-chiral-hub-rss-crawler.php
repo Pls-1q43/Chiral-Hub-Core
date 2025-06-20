@@ -1004,12 +1004,14 @@ class Chiral_Hub_RSS_Crawler {
 
         $extracted_image = $this->extract_first_image_from_content( $content );
         if ( $extracted_image ) {
-            error_log( 'Chiral Hub RSS: Extracted image from content: ' . $extracted_image );
+            // 确保HTML实体被正确解码
+            $decoded_image = html_entity_decode( $extracted_image, ENT_QUOTES, 'UTF-8' );
+            error_log( 'Chiral Hub RSS: Extracted image from content: ' . $decoded_image );
+            return $decoded_image;
         } else {
             error_log( 'Chiral Hub RSS: No image found in content' );
+            return null;
         }
-        
-        return $extracted_image;
     }
 
     /**
@@ -1043,7 +1045,13 @@ class Chiral_Hub_RSS_Crawler {
             $content = (string) $entry->summary;
         }
 
-        return $this->extract_first_image_from_content( $content );
+        $extracted_image = $this->extract_first_image_from_content( $content );
+        if ( $extracted_image ) {
+            // 确保HTML实体被正确解码
+            return html_entity_decode( $extracted_image, ENT_QUOTES, 'UTF-8' );
+        }
+        
+        return null;
     }
 
     /**
@@ -1127,13 +1135,7 @@ class Chiral_Hub_RSS_Crawler {
             return false;
         }
 
-        $original_url = $url;
-        // 解码HTML实体
-        $url = html_entity_decode( $url, ENT_QUOTES, 'UTF-8' );
-        
-        if ( $original_url !== $url ) {
-            error_log( 'Chiral Hub RSS: Decoded URL from "' . $original_url . '" to "' . $url . '"' );
-        }
+        // HTML实体解码已在图片提取阶段完成，这里直接验证
 
         // 检查URL格式
         if ( ! filter_var( $url, FILTER_VALIDATE_URL ) && ! $this->is_relative_url( $url ) ) {
@@ -1319,41 +1321,8 @@ class Chiral_Hub_RSS_Crawler {
         }
 
         error_log( 'Chiral Hub RSS: Processing Notion URL: ' . $image_url );
-
-        // 尝试简单的URL解码
-        $processed_url = urldecode( $image_url );
         
-        // 如果解码后的URL看起来更合理，使用它
-        if ( $processed_url !== $image_url ) {
-            error_log( 'Chiral Hub RSS: URL decoded from "' . $image_url . '" to "' . $processed_url . '"' );
-            
-            // 验证解码后的URL是否仍然有效
-            if ( filter_var( $processed_url, FILTER_VALIDATE_URL ) ) {
-                return $processed_url;
-            }
-        }
-
-        // 如果标准解码不够，尝试更深层的解码
-        $double_decoded = urldecode( $processed_url );
-        if ( $double_decoded !== $processed_url && filter_var( $double_decoded, FILTER_VALIDATE_URL ) ) {
-            error_log( 'Chiral Hub RSS: Double decoded URL: ' . $double_decoded );
-            return $double_decoded;
-        }
-
-        // 特殊处理Notion的attachment格式
-        if ( strpos( $image_url, 'attachment%3A' ) !== false ) {
-            // 替换特定的编码模式
-            $processed_url = str_replace( 
-                array( 'attachment%3A', '%3A' ), 
-                array( 'attachment:', ':' ), 
-                $image_url 
-            );
-            
-            error_log( 'Chiral Hub RSS: Processed attachment URL: ' . $processed_url );
-            return $processed_url;
-        }
-
-        error_log( 'Chiral Hub RSS: No processing needed for URL: ' . $image_url );
+        // 直接返回，HTML实体解码已经在提取阶段完成
         return $image_url;
     }
 
@@ -1394,7 +1363,7 @@ class Chiral_Hub_RSS_Crawler {
             }
         }
         
-        // 对于非Notion URL，使用标准检查
+        // 对于非Notion URL，直接检查（HTML实体解码已在提取阶段完成）
         $response = wp_remote_head( $url, array( 'timeout' => 30 ) );
         
         if ( is_wp_error( $response ) ) {
