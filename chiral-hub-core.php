@@ -3,7 +3,7 @@
  * Plugin Name: Chiral Hub Core
  * Plugin URI: https://ckc.akashio.com
  * Description: Transforms a WordPress site into a Chiral Hub, managing connected Chiral Nodes, aggregating data, and providing related content via Jetpack.
- * Version: 1.0.1
+ * Version: 1.1.0
  * Author: 评论尸(Pls)
  * Author URI: https://1q43.blog
  * License: GPLv3 or later
@@ -34,7 +34,7 @@ if ( ! defined( 'CHIRAL_HUB_CORE_PLUGIN_URL' ) ) {
 
 // Define CHIRAL_HUB_CORE_VERSION.
 if ( ! defined( 'CHIRAL_HUB_CORE_VERSION' ) ) {
-    define( 'CHIRAL_HUB_CORE_VERSION', '1.0.1' );
+    define( 'CHIRAL_HUB_CORE_VERSION', '1.1.0' );
 }
 
 /**
