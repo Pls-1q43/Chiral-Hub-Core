@@ -4,7 +4,7 @@ Donate link: https://1q43.blog/donate/
 Tags: hub, network, content aggregation, jetpack, related posts, cross-site, content discovery, api
 Requires at least: 5.2
 Tested up to: 6.6
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 Requires PHP: 7.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -145,6 +145,9 @@ No negative impact. The chiral_data post type is excluded from public searches a
 
 == Changelog ==
 
+= 1.1.0 =
+1. Bug fixes;
+2. Added basic support for static blog clients.
 
 = 1.0.1 =
 Important SEO enhancement: This update adds robots meta tags to prevent search engines from indexing aggregated content pages, solving duplicate content issues while preserving all existing functionality. Recommended for all users.
