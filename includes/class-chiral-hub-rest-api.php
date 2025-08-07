@@ -98,6 +98,34 @@ class Chiral_Hub_REST_API {
             'callback' => array( $this, 'ping_endpoint' ),
             'permission_callback' => array( $this, 'can_access_ping' ),
         ) );
+
+        // Lightweight endpoint for JS clients - only returns related post IDs (1.0.2+)
+        register_rest_route( self::API_NAMESPACE, '/related-post-ids', array(
+            'methods'  => WP_REST_Server::READABLE,
+            'callback' => array( $this, 'get_related_post_ids' ),
+            'args'     => array(
+                'cpt_id' => array(
+                    'required' => true,
+                    'type'     => 'integer',
+                    'description' => __( 'The chiral_data CPT ID to get related posts for.', 'chiral-hub-core' ),
+                    'sanitize_callback' => 'absint',
+                    'validate_callback' => function($param, $request, $key) {
+                        return is_numeric($param) && $param > 0;
+                    }
+                ),
+                'count' => array(
+                    'required' => false,
+                    'type'     => 'integer',
+                    'default'  => 5,
+                    'description' => __( 'Number of related post IDs to return.', 'chiral-hub-core' ),
+                    'sanitize_callback' => 'absint',
+                    'validate_callback' => function($param, $request, $key) {
+                        return is_numeric($param) && $param > 0 && $param <= 20;
+                    }
+                ),
+            ),
+            'permission_callback' => '__return_true', // No validation needed for public endpoint
+        ) );
     }
 
     /**
@@ -195,33 +223,35 @@ class Chiral_Hub_REST_API {
         }
         $hub_cpt_id = $hub_posts[0];
 
-        // Check if Jetpack and Related Posts module are active
-        $jetpack_handler = new Chiral_Hub_Jetpack();
-        if ( ! $jetpack_handler->is_jetpack_related_posts_active() ) {
-            return new WP_Error(
-                'jetpack_not_active',
-                __( 'Jetpack Related Posts module is not active or Jetpack is not connected.', 'chiral-hub-core' ),
-                array( 'status' => 503 ) // Service Unavailable
-            );
+        // Get current site domain for WordPress.com API
+        $site_url = home_url();
+        $parsed_url = wp_parse_url( $site_url );
+        $hub_domain = $parsed_url['host'];
+
+        // Call WordPress.com API directly to get related posts
+        $related_data_response = $this->get_related_post_ids_from_wp_api( $hub_domain, $hub_cpt_id, $count );
+
+        if ( is_wp_error( $related_data_response ) ) {
+            return $related_data_response; // Propagate API error
         }
 
-        $related_posts_raw = $jetpack_handler->get_related_posts_for_id( $hub_cpt_id, array( 'size' => $count ) );
-
-        if ( is_wp_error( $related_posts_raw ) ) {
-            return $related_posts_raw; // Propagate Jetpack error
-        }
-
-        if ( empty( $related_posts_raw ) ) {
+        if ( empty( $related_data_response['hits'] ) ) {
             return new WP_REST_Response( array(), 200 ); // No related posts found, but request is valid
+        }
+
+        // Convert API response format to match the expected format
+        $related_posts_raw = array();
+        foreach ( $related_data_response['hits'] as $hit ) {
+            if ( isset( $hit['fields']['post_id'] ) ) {
+                $related_posts_raw[] = array( 'id' => $hit['fields']['post_id'] );
+            }
         }
 
         $related_data = array();
         foreach ( $related_posts_raw as $related_post_obj ) {
-            // Handle both object and array formats from Jetpack
+            // Handle array format from WordPress.com API
             $related_post_id = null;
-            if ( is_object( $related_post_obj ) && isset( $related_post_obj->id ) ) {
-                $related_post_id = $related_post_obj->id;
-            } elseif ( is_array( $related_post_obj ) && isset( $related_post_obj['id'] ) ) {
+            if ( is_array( $related_post_obj ) && isset( $related_post_obj['id'] ) ) {
                 $related_post_id = $related_post_obj['id'];
             }
             
@@ -372,5 +402,185 @@ class Chiral_Hub_REST_API {
         // If Hub Transfer Mode is DISABLED, chiral_source_url should be exposed (which it is by default now because show_in_rest=true during registration).
         // Node will read chiral_source_url from metadata and use it as the direct link.
         return $response;
+    }
+
+
+    /**
+     * Get related post IDs for JS clients (lightweight version).
+     * This endpoint only returns the IDs, letting JS clients fetch details directly from WordPress.com API.
+     * Uses WordPress.com public API directly, no Jetpack dependency required.
+     *
+     * @since  1.0.2
+     * @param  WP_REST_Request $request Full details about the request.
+     * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+     */
+    public function get_related_post_ids( WP_REST_Request $request ) {
+        $cpt_id = $request->get_param( 'cpt_id' );
+        $count = $request->get_param( 'count' );
+
+        // Validate that the CPT exists and is of correct type
+        $post = get_post( $cpt_id );
+        if ( ! $post || $post->post_type !== Chiral_Hub_CPT::CPT_SLUG ) {
+            return new WP_Error(
+                'invalid_cpt_id',
+                __( 'Invalid chiral_data CPT ID provided.', 'chiral-hub-core' ),
+                array( 'status' => 404 )
+            );
+        }
+
+        // Get current site domain for WordPress.com API
+        $site_url = home_url();
+        $parsed_url = wp_parse_url( $site_url );
+        $hub_domain = $parsed_url['host'];
+
+        // Call WordPress.com API directly to get related posts
+        $related_data = $this->get_related_post_ids_from_wp_api( $hub_domain, $cpt_id, $count );
+
+        if ( is_wp_error( $related_data ) ) {
+            return $related_data; // Propagate API error
+        }
+
+        if ( empty( $related_data['hits'] ) ) {
+            return new WP_REST_Response( array( 'related_post_ids' => array() ), 200 );
+        }
+
+        $related_post_ids = array();
+        foreach ( $related_data['hits'] as $hit ) {
+            if ( isset( $hit['fields']['post_id'] ) ) {
+                $related_post_id = intval( $hit['fields']['post_id'] );
+                
+                // Include both chiral_data and regular posts
+                $post_type = get_post_type( $related_post_id );
+                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                    error_log( 'Chiral Hub: Found related post ID ' . $related_post_id . ' with post_type: ' . ( $post_type ?: 'NOT_FOUND' ) );
+                }
+                
+                if ( $post_type === Chiral_Hub_CPT::CPT_SLUG || $post_type === 'post' ) {
+                    $related_post_ids[] = $related_post_id;
+                }
+            }
+        }
+
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( 'Chiral Hub: Final filtered related_post_ids count: ' . count( $related_post_ids ) );
+        }
+
+        return new WP_REST_Response( array( 'related_post_ids' => $related_post_ids ), 200 );
+    }
+
+    /**
+     * Get related post IDs from WordPress.com API directly.
+     * Replicates the logic from Chiral-Connector to avoid Jetpack dependency.
+     *
+     * @since  1.0.2
+     * @param  string $site_identifier Site domain or identifier.
+     * @param  int    $post_id         Post ID to get related posts for.
+     * @param  int    $size            Number of related posts to fetch.
+     * @return array|WP_Error          The API response or WP_Error on failure.
+     */
+    private function get_related_post_ids_from_wp_api( $site_identifier, $post_id, $size = 5 ) {
+        $api_url = sprintf(
+            'https://public-api.wordpress.com/rest/v1.1/sites/%s/posts/%d/related',
+            rawurlencode( $site_identifier ),
+            $post_id
+        );
+
+        $args = array(
+            'method'  => 'POST', // WordPress.com API requires POST for related posts
+            'timeout' => 30,
+            'body'    => array(
+                'size' => $size,
+                'pretty' => true,
+                'filter' => array(
+                    'terms' => array(
+                        'post_type' => array( 'post', 'chiral_data' ) // Include both regular posts and chiral_data
+                    )
+                ),
+            ),
+        );
+
+        $response = wp_remote_post( $api_url, $args );
+
+        // Debug logging
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( 'Chiral Hub: WordPress.com API Request URL: ' . $api_url );
+            error_log( 'Chiral Hub: WordPress.com API Request Args: ' . wp_json_encode( $args ) );
+        }
+
+        if ( is_wp_error( $response ) ) {
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( 'Chiral Hub: WordPress.com API Error: ' . $response->get_error_message() );
+            }
+            return new WP_Error(
+                'wp_api_error',
+                sprintf( __( 'WordPress.com API error: %s', 'chiral-hub-core' ), $response->get_error_message() ),
+                array( 'status' => 500 )
+            );
+        }
+
+        $response_code = wp_remote_retrieve_response_code( $response );
+        $body = wp_remote_retrieve_body( $response );
+        $data = json_decode( $body, true );
+
+        // Debug logging
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( 'Chiral Hub: WordPress.com API Response Code: ' . $response_code );
+            error_log( 'Chiral Hub: WordPress.com API Response Body: ' . $body );
+            error_log( 'Chiral Hub: WordPress.com API Parsed Data: ' . wp_json_encode( $data ) );
+        }
+
+        if ( $response_code >= 200 && $response_code < 300 ) {
+            // Additional debug logging for successful but empty responses
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                if ( empty( $data ) || empty( $data['hits'] ) ) {
+                    error_log( 'Chiral Hub: WordPress.com API returned successful but empty response for post ID: ' . $post_id );
+                } else {
+                    error_log( 'Chiral Hub: WordPress.com API returned ' . count( $data['hits'] ) . ' related posts' );
+                }
+            }
+            
+            // Return data even if it's empty, let the caller handle it
+            return $data ? $data : array( 'hits' => array() );
+        } else {
+            // Handle specific error codes
+            $error_message = '';
+            switch ( $response_code ) {
+                case 403:
+                    $error_message = __( 'WordPress.com API access forbidden. Site may need to be connected to WordPress.com.', 'chiral-hub-core' );
+                    break;
+                case 404:
+                    $error_message = sprintf( __( 'Post ID %d not found on WordPress.com or site not available.', 'chiral-hub-core' ), $post_id );
+                    break;
+                case 400:
+                    $error_message = __( 'Bad request to WordPress.com API. Check post ID and site configuration.', 'chiral-hub-core' );
+                    break;
+                default:
+                    $error_message = sprintf(
+                        __( 'WordPress.com API returned error: %s (Code: %s)', 'chiral-hub-core' ),
+                        wp_remote_retrieve_response_message( $response ),
+                        $response_code
+                    );
+            }
+            
+            // Include more debug info in the error
+            $error_data = array( 
+                'status' => $response_code,
+                'response_body' => $data,
+                'api_url' => $api_url,
+                'request_args' => $args,
+                'post_id' => $post_id,
+                'site_identifier' => $site_identifier
+            );
+            
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( 'Chiral Hub: WordPress.com API Error Response: ' . wp_json_encode( $error_data ) );
+            }
+            
+            return new WP_Error(
+                'wp_api_http_error',
+                $error_message,
+                $error_data
+            );
+        }
     }
 }

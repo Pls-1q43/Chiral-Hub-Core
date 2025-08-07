@@ -178,6 +178,13 @@ class Chiral_Hub_CPT {
             '_chiral_data_original_featured_image_url' => __('URL of the original featured image. Hub does not download the image.', 'chiral-hub-core'),
             '_chiral_data_original_publish_date' => __('Original publish date of the item.', 'chiral-hub-core'),
             '_chiral_hub_cpt_id' => __('The ID of this CPT item on the Hub (used by Connector).', 'chiral-hub-core'), // This seems redundant if it's meta for itself, maybe for connector reference?
+            // RSS模式新增字段
+            '_chiral_source_type' => __('Data source type: wordpress or rss', 'chiral-hub-core'),
+            '_chiral_sync_method' => __('Sync method: plugin, sitemap, rss_crawl, or manual', 'chiral-hub-core'),
+            '_chiral_rss_entry_guid' => __('RSS entry GUID for RSS sourced content', 'chiral-hub-core'),
+            '_chiral_content_hash' => __('Content hash for change detection', 'chiral-hub-core'),
+            '_chiral_last_crawl_check' => __('Last crawl check timestamp', 'chiral-hub-core'),
+            '_chiral_crawl_priority' => __('Crawl priority (1-10, based on content age)', 'chiral-hub-core'),
         );
 
         foreach ( $meta_fields as $meta_key => $description ) {

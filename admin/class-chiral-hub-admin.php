@@ -46,7 +46,7 @@ class Chiral_Hub_Admin {
      * @since    1.0.0
      */
     public function enqueue_styles() {
-        wp_enqueue_style( $this->plugin_name, CHIRAL_HUB_CORE_PLUGIN_URL . 'admin/assets/css/chiral-hub-admin.css', array(), $this->version, 'all' );
+        wp_enqueue_style( $this->plugin_name, CHIRAL_HUB_CORE_PLUGIN_URL . 'admin/css/chiral-hub-admin.css', array(), $this->version, 'all' );
     }
 
     /**
@@ -55,7 +55,7 @@ class Chiral_Hub_Admin {
      * @since    1.0.0
      */
     public function enqueue_scripts() {
-        wp_enqueue_script( $this->plugin_name, CHIRAL_HUB_CORE_PLUGIN_URL . 'admin/assets/js/chiral-hub-admin.js', array( 'jquery' ), $this->version, false );
+        wp_enqueue_script( $this->plugin_name, CHIRAL_HUB_CORE_PLUGIN_URL . 'admin/js/chiral-hub-admin.js', array( 'jquery' ), $this->version, false );
     }
 
     /**

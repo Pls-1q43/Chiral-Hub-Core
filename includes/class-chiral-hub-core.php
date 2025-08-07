@@ -86,6 +86,7 @@ class Chiral_Hub_Core {
         $this->define_redirect_hooks();
         $this->define_jetpack_hooks();
         $this->define_node_checker_hooks();
+        $this->define_rss_hooks();
 
     }
 
@@ -169,6 +170,13 @@ class Chiral_Hub_Core {
          * The class responsible for node status checking.
          */
         require_once CHIRAL_HUB_CORE_PLUGIN_DIR . 'includes/class-chiral-hub-node-checker.php';
+
+        /**
+         * The class responsible for RSS crawling and processing (1.2.0+).
+         */
+        require_once CHIRAL_HUB_CORE_PLUGIN_DIR . 'includes/class-chiral-hub-rss-crawler.php';
+
+
 
         /**
          * The class responsible for utility functions.
@@ -293,11 +301,26 @@ class Chiral_Hub_Core {
     private function define_porter_admin_hooks() {
         $porter_admin = new Chiral_Hub_Porter_Admin();
         
+        // Handle Porter admin actions EARLY in admin_init to prevent headers already sent errors
+        $this->loader->add_action( 'admin_init', $porter_admin, 'handle_porter_admin_actions', 5 );
+        
         // Add custom Porter admin menu
         $this->loader->add_action( 'admin_menu', $porter_admin, 'add_porter_admin_menu' );
         
         // Redirect Porter users from standard CPT admin pages
         $this->loader->add_action( 'admin_init', $porter_admin, 'redirect_porter_from_cpt_admin' );
+        
+        // AJAX hooks for Porter admin functionality
+        $this->loader->add_action( 'wp_ajax_chiral_test_rss_connection', $porter_admin, 'ajax_test_rss_connection' );
+        $this->loader->add_action( 'wp_ajax_chiral_start_sitemap_import', $porter_admin, 'ajax_start_sitemap_import' );
+        $this->loader->add_action( 'wp_ajax_chiral_get_import_progress', $porter_admin, 'ajax_get_import_progress' );
+        $this->loader->add_action( 'wp_ajax_chiral_reset_import_status', $porter_admin, 'ajax_reset_import_status' );
+        $this->loader->add_action( 'wp_ajax_chiral_sync_rss_now', $porter_admin, 'ajax_sync_rss_now' );
+        $this->loader->add_action( 'wp_ajax_chiral_re_sync_post', $porter_admin, 'ajax_re_sync_post' );
+
+        // Cron hooks for background processing
+        $rss_crawler = new Chiral_Hub_RSS_Crawler( 'chiral-hub-core', CHIRAL_HUB_CORE_VERSION );
+        $this->loader->add_action( 'chiral_hub_process_sitemap_import', $rss_crawler, 'process_sitemap_import', 10, 2 );
     }
 
     /**
@@ -325,6 +348,9 @@ class Chiral_Hub_Core {
 
         // ULTIMATE SECURITY: Force correct post status at WordPress core level (highest priority)
         $this->loader->add_filter( 'wp_insert_post_data', $plugin_sync, 'force_post_status_at_core_level', 1, 2 );
+
+        // Generate random slug for all chiral_data posts to avoid Chinese slug issues
+        $this->loader->add_filter( 'wp_insert_post_data', $plugin_sync, 'generate_random_slug_for_chiral_data', 2, 2 );
 
         // Security: Intercept REST API requests early to prevent status bypass attacks
         $this->loader->add_filter( 'rest_pre_dispatch', $plugin_sync, 'intercept_chiral_data_requests', 10, 3 );
@@ -398,6 +424,20 @@ class Chiral_Hub_Core {
         // Handle cron jobs
         $this->loader->add_action( 'chiral_hub_daily_node_check', $node_checker, 'handle_daily_node_check' );
         $this->loader->add_action( 'chiral_hub_staggered_node_check', $node_checker, 'handle_staggered_node_check' );
+    }
+
+    /**
+     * Register RSS hooks.
+     *
+     * @since    1.0.0
+     * @access   private
+     */
+    private function define_rss_hooks() {
+        $rss_crawler = new Chiral_Hub_RSS_Crawler( $this->get_plugin_name(), $this->get_version() );
+        
+        // Schedule RSS sync tasks (these will be handled by WordPress cron)
+        $this->loader->add_action( 'chiral_hub_hourly_rss_sync', $rss_crawler, 'handle_hourly_rss_sync' );
+        $this->loader->add_action( 'chiral_hub_daily_rss_patrol', $rss_crawler, 'handle_daily_rss_patrol' );
     }
 
     /**

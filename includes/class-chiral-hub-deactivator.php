@@ -41,6 +41,11 @@ class Chiral_Hub_Deactivator {
         $node_checker = new Chiral_Hub_Node_Checker( 'chiral-hub-core', '1.0.0' );
         $node_checker->unschedule_daily_checks();
 
+        // Clear RSS sync cron jobs
+        wp_clear_scheduled_hook( 'chiral_hub_hourly_rss_sync' );
+        wp_clear_scheduled_hook( 'chiral_hub_daily_rss_patrol' );
+        wp_clear_scheduled_hook( 'chiral_hub_process_sitemap_import' ); // Also clear any pending sitemap imports
+
         // Flush rewrite rules.
         flush_rewrite_rules();
     }

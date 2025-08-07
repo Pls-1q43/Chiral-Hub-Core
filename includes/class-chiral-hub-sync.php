@@ -198,6 +198,42 @@ class Chiral_Hub_Sync {
     }
 
     /**
+     * Generate random slug for all chiral_data posts to avoid Chinese slug issues
+     *
+     * @since 1.2.0
+     * @param array $data Post data array
+     * @param array $postarr Original post data array
+     * @return array Modified post data array
+     */
+    public function generate_random_slug_for_chiral_data( $data, $postarr ) {
+        // Only process chiral_data post type
+        if ( ! isset( $postarr['post_type'] ) || $postarr['post_type'] !== Chiral_Hub_CPT::CPT_SLUG ) {
+            return $data;
+        }
+
+        // Skip if this is an update operation and post_name is already set
+        if ( isset( $postarr['ID'] ) && ! empty( $postarr['ID'] ) && ! empty( $data['post_name'] ) ) {
+            return $data;
+        }
+
+        // Skip if post_name is explicitly provided and is already in English
+        if ( ! empty( $data['post_name'] ) && ! preg_match( '/[\x{4e00}-\x{9fff}]/u', $data['post_name'] ) ) {
+            return $data;
+        }
+
+        // Generate random slug for new posts or posts with Chinese characters in slug
+        $source_url = '';
+        if ( isset( $postarr['meta_input']['chiral_source_url'] ) ) {
+            $source_url = $postarr['meta_input']['chiral_source_url'];
+        }
+
+        $random_slug = sanitize_title( substr( md5( $source_url . time() . mt_rand() ), 0, 10 ) );
+        $data['post_name'] = $random_slug;
+
+        return $data;
+    }
+
+    /**
      * The main function to process incoming data from a Chiral Node.
      *
      * @since    1.0.0
