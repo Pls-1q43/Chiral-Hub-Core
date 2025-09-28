@@ -4,7 +4,7 @@ Donate link: https://1q43.blog/donate/
 Tags: hub, network, content aggregation, jetpack, related posts, cross-site, content discovery, api
 Requires at least: 5.2
 Tested up to: 6.6
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 Requires PHP: 7.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -144,6 +144,9 @@ No negative impact. The chiral_data post type is excluded from public searches a
 5. Jetpack integration - Related posts powered by WordPress.com
 
 == Changelog ==
+
+= 1.1.1 =
+1. Fixed an issue where Chiral Data would always appear repeatedly.
 
 = 1.1.0 =
 1. Bug fixes;
