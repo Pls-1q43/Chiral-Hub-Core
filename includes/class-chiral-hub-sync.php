@@ -371,6 +371,7 @@ class Chiral_Hub_Sync {
     private function find_existing_chiral_data( $source_url, $node_id, $original_post_id ) {
         $posts = get_posts( array(
             'post_type'      => Chiral_Hub_CPT::CPT_SLUG,
+            'post_status'    => 'any',
             'posts_per_page' => 1,
             'meta_query'     => array(
                 'relation' => 'AND',
