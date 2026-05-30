@@ -211,8 +211,8 @@ class Chiral_Hub_Sync {
             return $data;
         }
 
-        // Skip if this is an update operation and post_name is already set
-        if ( isset( $postarr['ID'] ) && ! empty( $postarr['ID'] ) && ! empty( $data['post_name'] ) ) {
+        // Only generate random slugs for new posts. Updates and upserts keep the existing slug.
+        if ( isset( $postarr['ID'] ) && ! empty( $postarr['ID'] ) ) {
             return $data;
         }
 
@@ -386,6 +386,72 @@ class Chiral_Hub_Sync {
     }
 
     /**
+     * Finds an existing non-trashed chiral_data post for an incoming REST create request.
+     *
+     * @since 1.2.1
+     * @access private
+     * @param string $source_url       The source URL of the content.
+     * @param string $node_id          The ID of the Chiral Node.
+     * @param string $original_post_id The original post ID from the Chiral Node.
+     * @return int|null Post ID if found, null otherwise.
+     */
+    private function find_existing_active_chiral_data_for_rest_create( $source_url, $node_id, $original_post_id ) {
+        if ( empty( $node_id ) ) {
+            return null;
+        }
+
+        if ( ! empty( $original_post_id ) ) {
+            $existing_id = $this->find_first_non_trashed_chiral_data( array(
+                'relation' => 'AND',
+                array( 'key' => '_chiral_node_id', 'value' => $node_id, 'compare' => '=' ),
+                array( 'key' => '_chiral_data_original_post_id', 'value' => $original_post_id, 'compare' => '=' ),
+            ) );
+
+            if ( $existing_id ) {
+                return $existing_id;
+            }
+        }
+
+        if ( empty( $source_url ) ) {
+            return null;
+        }
+
+        return $this->find_first_non_trashed_chiral_data( array(
+            'relation' => 'AND',
+            array( 'key' => '_chiral_node_id', 'value' => $node_id, 'compare' => '=' ),
+            array( 'key' => 'chiral_source_url', 'value' => $source_url, 'compare' => '=' ),
+        ) );
+    }
+
+    /**
+     * Returns the first matching chiral_data post that has not been moved to trash.
+     *
+     * @since 1.2.1
+     * @access private
+     * @param array $meta_query The meta query to apply.
+     * @return int|null Post ID if found, null otherwise.
+     */
+    private function find_first_non_trashed_chiral_data( $meta_query ) {
+        $posts = get_posts( array(
+            'post_type'      => Chiral_Hub_CPT::CPT_SLUG,
+            'post_status'    => 'any',
+            'posts_per_page' => -1,
+            'orderby'        => 'ID',
+            'order'          => 'ASC',
+            'meta_query'     => $meta_query,
+            'fields'         => 'ids',
+        ) );
+
+        foreach ( $posts as $post_id ) {
+            if ( get_post_status( $post_id ) !== 'trash' ) {
+                return $post_id;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Set the featured image for a post from a URL.
      *
      * @since 1.0.0
@@ -452,9 +518,27 @@ class Chiral_Hub_Sync {
      */
     public function handle_rest_pre_insert_chiral_data( $prepared_post, $request ) {
         $params = $request->get_params();
+
+        $is_create_request = (
+            $request->get_method() === 'POST' &&
+            empty( $prepared_post->ID ) &&
+            ! preg_match( '#^/wp/v2/chiral_data/\d+$#', $request->get_route() )
+        );
+
+        if ( $is_create_request && $this->is_porter_user() && isset( $params['meta'] ) && is_array( $params['meta'] ) ) {
+            $source_url       = isset( $params['meta']['chiral_source_url'] ) ? esc_url_raw( $params['meta']['chiral_source_url'] ) : '';
+            $node_id          = isset( $params['meta']['_chiral_node_id'] ) ? sanitize_text_field( $params['meta']['_chiral_node_id'] ) : '';
+            $original_post_id = isset( $params['meta']['_chiral_data_original_post_id'] ) ? sanitize_text_field( $params['meta']['_chiral_data_original_post_id'] ) : '';
+            $existing_post_id = $this->find_existing_active_chiral_data_for_rest_create( $source_url, $node_id, $original_post_id );
+
+            if ( $existing_post_id ) {
+                $prepared_post->ID = $existing_post_id;
+                error_log( '[Chiral Hub Sync] Upsert matched existing chiral_data post ' . $existing_post_id . ' for node "' . $node_id . '" and original post "' . $original_post_id . '".' );
+            }
+        }
         
-        // Generate unique slug
-        if ( isset( $params['meta']['chiral_source_url'] ) && ! empty( $params['meta']['chiral_source_url'] ) ) {
+        // Generate unique slug for new posts only; upserted posts keep their existing slug.
+        if ( empty( $prepared_post->ID ) && isset( $params['meta']['chiral_source_url'] ) && ! empty( $params['meta']['chiral_source_url'] ) ) {
             $prepared_post->post_name = sanitize_title( substr( md5( $params['meta']['chiral_source_url'] . time() ), 0, 10 ) );
         }
 
